@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="2.0" xmlns:edmx="http://schemas.microsoft.com/ado/2008/10/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema xmlns="http://schemas.microsoft.com/ado/2009/02/edm/ssdl" Namespace="BanlistDb.Store" Alias="Self" Provider="System.Data.SqlClient" ProviderManifestToken="2005">
+        <EntityContainer Name="BanlistDbTargetContainer" >
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" xmlns:cg="http://schemas.microsoft.com/ado/2006/04/codegeneration" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" Namespace="BanlistDb" Alias="Self" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation">
+        <EntityContainer Name="BanlistDbContext" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Matches" EntityType="BanlistDb.Matches" />
+          <EntitySet Name="SteamIds" EntityType="BanlistDb.SteamIds" />
+          <EntitySet Name="MatchPlayers" EntityType="BanlistDb.MatchPlayers" />
+          <AssociationSet Name="MatchPlayersMatches" Association="BanlistDb.MatchPlayersMatches">
+            <End Role="MatchPlayers" EntitySet="MatchPlayers" />
+            <End Role="Matches" EntitySet="Matches" />
+          </AssociationSet>
+          <AssociationSet Name="MatchPlayersSteamIds" Association="BanlistDb.MatchPlayersSteamIds">
+            <End Role="MatchPlayers" EntitySet="MatchPlayers" />
+            <End Role="SteamIds" EntitySet="SteamIds" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="Matches">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Type="Int32" Name="Id" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="Int64" Name="LobbyId" Nullable="false" />
+        </EntityType>
+        <EntityType Name="SteamIds">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Type="Int64" Name="Id" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="Int64" Name="SteamId_Y" Nullable="false" />
+          <Property Type="Int64" Name="SteamId_Z" Nullable="false" />
+          <Property Type="Int64" Name="SteamIdEncoded" Nullable="false" />
+          <Property Type="String" Name="CurrentName" Nullable="true" />
+        </EntityType>
+        <EntityType Name="MatchPlayers">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Type="Int32" Name="Id" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="Int32" Name="PlayerIndex" Nullable="false" />
+          <NavigationProperty Name="Match" Relationship="BanlistDb.MatchPlayersMatches" FromRole="MatchPlayers" ToRole="Matches" />
+          <NavigationProperty Name="SteamId" Relationship="BanlistDb.MatchPlayersSteamIds" FromRole="MatchPlayers" ToRole="SteamIds" />
+        </EntityType>
+        <Association Name="MatchPlayersMatches">
+          <End Type="BanlistDb.MatchPlayers" Role="MatchPlayers" Multiplicity="1" />
+          <End Type="BanlistDb.Matches" Role="Matches" Multiplicity="1" />
+        </Association>
+        <Association Name="MatchPlayersSteamIds">
+          <End Type="BanlistDb.MatchPlayers" Role="MatchPlayers" Multiplicity="1" />
+          <End Type="BanlistDb.SteamIds" Role="SteamIds" Multiplicity="1" />
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping xmlns="http://schemas.microsoft.com/ado/2008/09/mapping/cs" Space="C-S">
+        <Alias Key="Model" Value="BanlistDb" />
+        <Alias Key="Target" Value="BanlistDb.Store" />
+        <EntityContainerMapping CdmEntityContainer="BanlistDbContext" StorageEntityContainer="BanlistDbTargetContainer">
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2008/10/edmx">
+    <edmx:Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </edmx:Connection>
+    <edmx:Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="True" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+        <DesignerProperty Name="DDLGenerationTemplate" Value="$(VSEFTools)\DBGen\SSDLToSQLite3.tt" />
+      </DesignerInfoPropertySet>
+    </edmx:Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram Name="BanlistDb" >
+        <EntityTypeShape EntityType="BanlistDb.Matches" Width="1.5" PointX="6.125" PointY="3" Height="1.4033821614583326" />
+        <EntityTypeShape EntityType="BanlistDb.SteamIds" Width="1.5" PointX="8.625" PointY="3.25" Height="1.9802864583333326" />
+        <EntityTypeShape EntityType="BanlistDb.MatchPlayers" Width="1.5" PointX="4" PointY="5.25" Height="1.7879850260416657" />
+        <AssociationConnector Association="BanlistDb.MatchPlayersMatches">
+          <ConnectorPoint PointX="4.75" PointY="5.25" />
+          <ConnectorPoint PointX="4.75" PointY="3.7016910807291663" />
+          <ConnectorPoint PointX="6.125" PointY="3.7016910807291663" />
+        </AssociationConnector>
+        <AssociationConnector Association="BanlistDb.MatchPlayersSteamIds">
+          <ConnectorPoint PointX="5.5" PointY="6.1752450130208327" />
+          <ConnectorPoint PointX="9.375" PointY="6.1752450130208327" />
+          <ConnectorPoint PointX="9.375" PointY="5.2302864583333326" />
+        </AssociationConnector>
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

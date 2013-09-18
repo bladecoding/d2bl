@@ -8,12 +8,14 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Ninject;
+using Steam;
 
 namespace Dota2BanlistCore
 {
     public class ServerLogMatchProvider : IDisposable, IMatchProvider
     {
-        const string CrazyRegex = @"(?<date>\d+/\d+/\d+)\s+-\s+(?<time>\d+:\d+:\d+):\s+(?<ipaddr>\d+\.\d+\.\d+\.\d+:\d+)\s+\(\w+\s+\d+\s+(?<gamemode>\w+)\s+((?<ids>\d:\[\w+:\d+:\d+\])\s*)+\)";
+
+        const string CrazyRegex = @"(?<date>\d+/\d+/\d+)\s+-\s+(?<time>\d+:\d+:\d+):\s+(?<ipaddr>\d+\.\d+\.\d+\.\d+:\d+)\s+\(\w+\s+\d+\s+(?<gamemode>\w+)\s+((?<ids>\d:\[\w+:\d+:\d+\])\s*)+\)\s*\(\w+\s+\d+\s+((?<partyids>\d:\[\w+:\d+:\d+\])\s*)+\)";
         const string SubCrazyRegex = @"\d+:\[\w+:\d+:(?<id>\d+)\]";
 
         readonly FileInfo m_ServerLogFile;
@@ -27,8 +29,11 @@ namespace Dota2BanlistCore
             m_Watcher = new FileSystemWatcher(serverLogFile.DirectoryName, serverLogFile.Name);
             m_Watcher.EnableRaisingEvents = true;
             m_Watcher.Changed += watcher_Changed;
+        }
 
-            ThreadPool.QueueUserWorkItem(ReadLatestEntries);
+        public void ReadLatestEntries()
+        {
+            ReadEntries();
         }
 
         void watcher_Changed(object sender, FileSystemEventArgs e)
@@ -36,42 +41,55 @@ namespace Dota2BanlistCore
             if (m_Watcher == null)
                 return;
 
-            ReadLatestEntries("grrr");
+            ReadEntries();
         }
 
-        void ReadLatestEntries(object state)
+        readonly object m_FileLock = new object();
+        void ReadEntries()
         {
             //Inb4 regex is a bottleneck :|
-
             var matches = new List<Match>();
-            
-            string line;
-            while ((line = m_ServerReader.ReadLine()) != null)
+
+            lock (m_FileLock)
             {
-                var match = Regex.Match(line, CrazyRegex);
-                if (match.Success)
+                string line;
+                while ((line = m_ServerReader.ReadLine()) != null)
                 {
-                    DateTime dt;
-                    if (!DateTime.TryParseExact(match.Groups["date"].Value + match.Groups["time"].Value, "MM/dd/yyyyHH:mm:ss", null, DateTimeStyles.None, out dt))
-                        continue;
+                    var match = Regex.Match(line, CrazyRegex);
+                    if (match.Success)
+                    {
+                        long lobbyId;
+                        if (!long.TryParse(match.Groups["lobbyid"].Value, out lobbyId))
+                            continue;
 
-                    IPEndPoint ip;
-                    if (!TryCreateIpEndPoint(match.Groups["ipaddr"].Value, out ip))
-                        continue;
+                        DateTime dt;
+                        if (!DateTime.TryParseExact(match.Groups["date"].Value + match.Groups["time"].Value, "MM/dd/yyyyHH:mm:ss", null, DateTimeStyles.None, out dt))
+                            continue;
 
-                    string gamemode = match.Groups["gamemode"].Value;
+                        IPEndPoint ip;
+                        if (!TryCreateIpEndPoint(match.Groups["ipaddr"].Value, out ip))
+                            continue;
 
-                    IList<SteamId> steamIds;
-                    var idsGroup = match.Groups["ids"];
-                    if (!TryParseSteamIds(idsGroup.Captures.Cast<Capture>().Select(c => c.Value), out steamIds))
-                        continue;
+                        string gamemode = match.Groups["gamemode"].Value;
 
-                    matches.Add(new Match { Date = dt, IpAddress = ip, Gamemode = gamemode, SteamIds = steamIds});
+                        IList<SteamId> steamIds;
+                        var idsGroup = match.Groups["ids"];
+                        if (!TryParseSteamIds(idsGroup.Captures.Cast<Capture>().Select(c => c.Value), out steamIds))
+                            continue;
+
+                        IList<SteamId> partySteamIds;
+                        var partyIdsGroup = match.Groups["partyids"];
+                        if (!TryParseSteamIds(partyIdsGroup.Captures.Cast<Capture>().Select(c => c.Value), out partySteamIds))
+                            continue;
+
+                        matches.Add(new Match { LobbyId = lobbyId, Date = dt, IpAddress = ip, Gamemode = gamemode, SteamIds = steamIds, PartySteamIds = partySteamIds });
+                    }
                 }
             }
 
             if (matches.Count > 0 && MatchesFound != null)
                 MatchesFound(this, new MatchesFoundEventArgs(matches));
+
         }
 
         static bool TryParseSteamIds(IEnumerable<string> strs, out IList<SteamId> ids)
@@ -93,15 +111,15 @@ namespace Dota2BanlistCore
             ipEndPoint = null;
 
             var ep = endPoint.Split(':');
-            if (ep.Length != 2) 
+            if (ep.Length != 2)
                 return false;
-            
+
             IPAddress ip;
             int port;
 
             if (!IPAddress.TryParse(ep[0], out ip))
                 return false;
-            
+
             if (!int.TryParse(ep[1], NumberStyles.None, NumberFormatInfo.CurrentInfo, out port))
                 return false;
 
