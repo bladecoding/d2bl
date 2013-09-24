@@ -17,17 +17,28 @@ along with Dota2Banlist.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Linq;
 using System.Text;
+using Newtonsoft.Json;
+using Steam.JsonConverters;
 
-namespace Dota2BanlistCore.Db
+namespace Steam.Api.Model
 {
-    public partial class BanlistDbContext
+    public class GetFriendListResponse
     {
-        public BanlistDbContext(DbConnection conn)
-            : base(conn, true)
-        {
-        }
+        [JsonProperty("friends")]
+        public IList<SteamFriend> Friends {get;set;} 
+    }
+
+    public class SteamFriend
+    {
+        [JsonProperty("steamid"), JsonConverter(typeof(Steam64ToSteamId))]
+        public SteamId SteamId { get; set; }
+
+        [JsonProperty("relationship")]
+        public string Relationship { get; set; }
+
+        [JsonProperty("friend_since"), JsonConverter(typeof(IntegerToDateTime))]
+        public DateTime FriendSince { get; set; }
     }
 }

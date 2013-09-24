@@ -53,6 +53,9 @@
     <Reference Include="MoreLinq">
       <HintPath>..\packages\morelinq.1.0.16006\lib\net35\MoreLinq.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.5.0.6\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="Ninject">
       <HintPath>..\packages\Ninject.3.0.1.10\lib\net40\Ninject.dll</HintPath>
     </Reference>
@@ -72,6 +75,7 @@
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -79,6 +83,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Util\CConsole.cs" />
     <Compile Include="Db\BanlistDb.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -104,13 +109,25 @@
     <Compile Include="Db\SteamIds.cs">
       <DependentUpon>BanlistDbContext.tt</DependentUpon>
     </Compile>
+    <Compile Include="Steam\JsonConverters\IntegerToDateTime.cs" />
+    <Compile Include="Steam\Api\BaseServiceApi.cs" />
+    <Compile Include="Steam\Api\Model\GetFriendListResponse.cs" />
+    <Compile Include="Steam\Api\Model\GetOwnedGamesResponse.cs" />
+    <Compile Include="Steam\Api\Model\GetPlayerSummariesResponse.cs" />
+    <Compile Include="Steam\Api\PlayerService.cs" />
+    <Compile Include="Steam\Api\SteamUser.cs" />
     <Compile Include="Steam\Matches\IMatchProvider.cs" />
     <Compile Include="Steam\Matches\Match.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Steam\Matches\ServerLogMatchProvider.cs" />
+    <Compile Include="Steam\JsonConverters\Steam64ToSteamId.cs" />
     <Compile Include="Steam\SteamId.cs" />
+    <Compile Include="Util\ColumnLines.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\Dota2Banlist.licenseheader">
+      <Link>Dota2Banlist.licenseheader</Link>
+    </None>
     <None Include="App.config" />
     <EntityDeploy Include="Db\BanlistDb.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
@@ -159,9 +176,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Steam\Api\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

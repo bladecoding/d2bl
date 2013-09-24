@@ -1,4 +1,21 @@
-﻿using System;
+﻿/*
+This file is part of Dota2Banlist.
+
+Dota2Banlist is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Dota2Banlist is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Dota2Banlist.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -15,7 +32,7 @@ namespace Dota2BanlistCore
     public class ServerLogMatchProvider : IDisposable, IMatchProvider
     {
 
-        const string CrazyRegex = @"(?<date>\d+/\d+/\d+)\s+-\s+(?<time>\d+:\d+:\d+):\s+(?<ipaddr>\d+\.\d+\.\d+\.\d+:\d+)\s+\(\w+\s+\d+\s+(?<gamemode>\w+)\s+((?<ids>\d:\[\w+:\d+:\d+\])\s*)+\)\s*\(\w+\s+\d+\s+((?<partyids>\d:\[\w+:\d+:\d+\])\s*)+\)";
+        const string CrazyRegex = @"(?<date>\d+/\d+/\d+)\s+-\s+(?<time>\d+:\d+:\d+):\s+(?<ipaddr>\d+\.\d+\.\d+\.\d+:\d+)\s+\(\w+\s+(?<lobbyid>\d+)\s+(?<gamemode>\w+)\s+((?<ids>\d:\[\w+:\d+:\d+\])\s*)+\)(\s*\(\w+\s+\d+\s+((?<partyids>\d:\[\w+:\d+:\d+\])\s*)+\))?";
         const string SubCrazyRegex = @"\d+:\[\w+:\d+:(?<id>\d+)\]";
 
         readonly FileInfo m_ServerLogFile;
@@ -79,8 +96,8 @@ namespace Dota2BanlistCore
 
                         IList<SteamId> partySteamIds;
                         var partyIdsGroup = match.Groups["partyids"];
-                        if (!TryParseSteamIds(partyIdsGroup.Captures.Cast<Capture>().Select(c => c.Value), out partySteamIds))
-                            continue;
+                        if (partyIdsGroup == null || !TryParseSteamIds(partyIdsGroup.Captures.Cast<Capture>().Select(c => c.Value), out partySteamIds))
+                            partySteamIds = new List<SteamId>();
 
                         matches.Add(new Match { LobbyId = lobbyId, Date = dt, IpAddress = ip, Gamemode = gamemode, SteamIds = steamIds, PartySteamIds = partySteamIds });
                     }
