@@ -143,7 +143,7 @@ namespace DotaBuff
                 match.Date = ParseNodeDateTime(timeNode);
                 match.MatchId = long.Parse(matchNode.InnerText, NumberStyles.Any);
                 match.GameMode = gameModeNode.InnerText;
-                match.Duration = TimeSpan.ParseExact(durationNode.InnerText, new[] { "mm':'ss", "hh':'mm':'ss" }, null);
+                match.Duration = TimeSpan.ParseExact(durationNode.InnerText, new[] { "m':'s", "h':'m':'s" }, null);
                 match.Kills = killsDeathsAssists.Item1;
                 match.Deaths = killsDeathsAssists.Item2;
                 match.Assists = killsDeathsAssists.Item3;
