@@ -42,23 +42,35 @@ namespace DotaBuff
             //Most plyaed is on the main page. (http://dotabuff.com/players/<id>)
             //Real matches is on a separate page. (http://dotabuff.com/players/<id>/_matches)
 
-            var details = new PlayerDetailsOverview();
+            try
+            {
+                var details = new PlayerDetailsOverview();
 
-            var doc = RequestDocument(string.Format("http://dotabuff.com/players/{0}", HttpUtility.UrlEncode(id)));
+                var doc = RequestDocument(string.Format("http://dotabuff.com/players/{0}", HttpUtility.UrlEncode(id)));
 
-            var nameNode = GetNodeFromXpathOrError(doc.DocumentNode, "//*[@class=\"content-header-title\"]");
-            var secondaryNode = GetNodeFromXpathOrError(doc.DocumentNode, "//*[@id=\"content-header-secondary\"]");
-            var wonNode = GetNodeFromXpathOrError(secondaryNode, ".//span[@class='won']");
-            var lostNode = GetNodeFromXpathOrError(secondaryNode, ".//span[@class='lost']");
+                var nameNode = GetNodeFromXpathOrError(doc.DocumentNode, "//*[@class=\"content-header-title\"]");
+                var secondaryNode = GetNodeFromXpathOrError(doc.DocumentNode, "//*[@id=\"content-header-secondary\"]");
+                var lastMatchNode = GetNodeFromXpathOrError(secondaryNode, ".//time[@class='timeago']");
+                var wonNode = GetNodeFromXpathOrError(secondaryNode, ".//span[@class='won']");
+                var lostNode = GetNodeFromXpathOrError(secondaryNode, ".//span[@class='lost']");
 
-            details.PlayerName = HtmlEntity.DeEntitize(nameNode.InnerText);
-            details.Wins = int.Parse(wonNode.InnerText);
-            details.Losses = int.Parse(lostNode.InnerText);
-            details.MostPlayedHeroes = GetMostPlayedHeroes(doc.DocumentNode);
-            details.LatestRealMatches = RequestLatestMatches(id);
+                details.PlayerName = HtmlEntity.DeEntitize(nameNode.InnerText);
+                details.LastMatch = ParseNodeDateTime(lastMatchNode); 
+                details.Wins = int.Parse(wonNode.InnerText, NumberStyles.Any);
+                details.Losses = int.Parse(lostNode.InnerText, NumberStyles.Any);
+                details.MostPlayedHeroes = GetMostPlayedHeroes(doc.DocumentNode);
+                details.LatestRealMatches = RequestLatestMatches(id);
 
 
-            return details;
+                return details;
+            }
+            catch (WebException we)
+            {
+                var resp = we.Response as HttpWebResponse;
+                if (resp != null && resp.StatusCode == HttpStatusCode.NotFound)
+                    return null;
+                throw;
+            }
         }
 
         private static IList<MostPlayedHero> GetMostPlayedHeroes(HtmlNode doc)
@@ -79,9 +91,9 @@ namespace DotaBuff
                 var kdaRatioNode = columns[columnIdx++];
 
                 hero.HeroName = heroNode.InnerText;
-                hero.MatchesPlayed = int.Parse(matchesNode.InnerText);
-                hero.WinRate = double.Parse(winRateNode.InnerText.TrimEnd('%'));
-                hero.KdaRatio = double.Parse(kdaRatioNode.InnerText.TrimEnd('%'));
+                hero.MatchesPlayed = int.Parse(matchesNode.InnerText, NumberStyles.Any);
+                hero.WinRate = double.Parse(winRateNode.InnerText.TrimEnd('%'), NumberStyles.Any);
+                hero.KdaRatio = double.Parse(kdaRatioNode.InnerText.TrimEnd('%'), NumberStyles.Any);
 
                 heroes.Add(hero);
             }
@@ -90,13 +102,23 @@ namespace DotaBuff
         }
 
 
-        public static IList<LatestRealMatch> RequestLatestMatches(string id)
+        private static IList<LatestRealMatch> RequestLatestMatches(string id)
         {
-            var doc = RequestDocument(string.Format("http://dotabuff.com/players/{0}/_matches", HttpUtility.UrlEncode(id)));
-            return GetLatestMatches(doc);
+            try
+            {
+                var doc = RequestDocument(string.Format("http://dotabuff.com/players/{0}/_matches", HttpUtility.UrlEncode(id)));
+                return GetLatestMatches(doc);
+            }
+            catch (WebException we)
+            {
+                var resp = we.Response as HttpWebResponse;
+                if (resp != null && resp.StatusCode == HttpStatusCode.NotFound)
+                    return null;
+                throw;
+            }
         }
 
-        public static IList<LatestRealMatch> GetLatestMatches(HtmlDocument doc)
+        private static IList<LatestRealMatch> GetLatestMatches(HtmlDocument doc)
         {
             var matches = new List<LatestRealMatch>();
             var rows = doc.DocumentNode.SelectNodes(".//tbody/tr");
@@ -119,7 +141,7 @@ namespace DotaBuff
                 match.HeroName = heroNode.InnerText;
                 match.Won = wonNode != null;
                 match.Date = ParseNodeDateTime(timeNode);
-                match.MatchId = long.Parse(matchNode.InnerText);
+                match.MatchId = long.Parse(matchNode.InnerText, NumberStyles.Any);
                 match.GameMode = gameModeNode.InnerText;
                 match.Duration = TimeSpan.ParseExact(durationNode.InnerText, new[] { "mm':'ss", "hh':'mm':'ss" }, null);
                 match.Kills = killsDeathsAssists.Item1;
@@ -153,7 +175,7 @@ namespace DotaBuff
         {
             DateTime dt;
             if (!node.Attributes.Contains("datetime") ||
-                !DateTime.TryParseExact(node.Attributes["datetime"].Value, "yyyy-MM-ddThh:mm:ssZ", null, DateTimeStyles.None, out dt))
+                !DateTime.TryParseExact(node.Attributes["datetime"].Value, "yyyy-MM-dd'T'HH:mm:ss'Z'", null, DateTimeStyles.None, out dt))
                 throw new InvalidOperationException("Datetime not valid: " + node.Attributes["datetime"].Value);
             return dt;
         }
