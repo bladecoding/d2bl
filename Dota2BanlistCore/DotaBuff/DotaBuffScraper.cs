@@ -194,7 +194,7 @@ namespace DotaBuff
             var doc = new HtmlDocument();
             doc.Load(new StringReader(html));
 
-            if (doc.ParseErrors != null && doc.ParseErrors.Any())
+            if (doc.ParseErrors != null && doc.ParseErrors.Any(p => p.Code != HtmlParseErrorCode.EndTagNotRequired))
                 throw new InvalidOperationException("Parse error: " + doc.ParseErrors.First().Reason);
 
             if (doc.DocumentNode == null)
