@@ -25,6 +25,7 @@ using System.Threading;
 using System.Windows.Forms;
 using Dota2BanlistCore;
 using Dota2BanlistCore.Db;
+using DotaBuff;
 using Ninject;
 using MoreLinq;
 using Steam;
@@ -46,7 +47,7 @@ namespace Dota2Banlist
             //var kernal = new StandardKernel();
             //kernal.Bind<Dota2BanlistCore.Db.BanlistDbContext>().ToConstant(new Dota2BanlistCore.Db.BanlistDbContext());
 
-            var steamKey = "<STEAM KEY HERE>";
+            var steamKey = "8F2CC22E983A31E9FC3B51C84E5FF5ED";
 
             //Inb4 valve revokes my key for api request spam.
 
@@ -55,12 +56,8 @@ namespace Dota2Banlist
             {
                 server.MatchesFound += (sender, args) =>
                 {
-                    if (args.Matches.Count != 1)
-                        return;
-
-                    Console.Clear();
-
-                    Console.WriteLine("Found match {0}. Grabbing usernames", args.Matches.First().LobbyId);
+                    //if (args.Matches.Count != 1)
+                        //return;
 
                     //Don't block the filewatcher!
                     //I feel dirty. Keep telling myself this is just for testing.
@@ -72,42 +69,99 @@ namespace Dota2Banlist
                         var ids = args.Matches.Last().SteamIds;
 
                         var columns = new ColumnLines();
+                        columns.Spacing = 2;
                         columns.AddLine(
                                 "Index",
                                 "Name",
-                                "Country",
+                                "Party",
+                                "Created",
                                 "Hours",
-                                "Friends");
+                                "Country",
+                                "Matches",
+                                "WinRatio",
+                                "LastPlayed");
+
+                        var playerData = new List<Tuple<PlayerSummary, OwnedGame, List<PlayerSummary>, PlayerDetailsOverview>>();
                         for (int i = 0; i < ids.Count; i++)
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Loading Information. {0:00}%", (i * 100f)/ ids.Count);
+
+                            var player = summaries.Players.Single(p => object.Equals(p.SteamId, ids[i]));
+
+                            var psa = new PlayerServiceApi(steamKey);
+                            var dota = psa.GetOwnedGames(ids[i], 570);
+                            var game = dota.Games != null ? psa.GetOwnedGames(ids[i], 570).Games.FirstOrDefault(g => g.AppId == 570) : null;
+
+                            var friends = player.CommunityVisibilityState == 3 ? api.GetFriendList(ids[i]).Friends : null;
+                            var friendsInGame = friends != null ? friends.Select(f => summaries.Players.SingleOrDefault(p => object.Equals(p.SteamId, f.SteamId))).Where(f => f != null).ToList() : new List<PlayerSummary>();
+
+                            PlayerDetailsOverview overview = null;
+                            try
+                            {
+                                overview = DotaBuffScraper.RequestPlayerOverview(player.SteamId.ToEncodedIdString());
+                            }
+                            catch (Exception ex)
+                            {
+                                CConsole.WriteLine(ConsoleColor.DarkRed, ex.Message.ToString());
+                            }
+
+                            playerData.Add(Tuple.Create(player, game, friendsInGame, overview));
+                        }
+                        Console.Clear();
+                        Console.WriteLine("Loaded Information. d2bl");
+
+                        var parties = new List<HashSet<SteamId>>();
+                        for (int i = 0; i < playerData.Count; i++)
+                        {
+                            var players = playerData[i].Item3
+                                .Select(s => s.SteamId)
+                                .Concat(playerData[i].Item1.SteamId)
+                                .ToList();
+
+                            var party = parties.Find(hs => players.Any(hs.Contains));
+                            if (party == null)
+                            {
+                                party = new HashSet<SteamId>();
+                                parties.Add(party);
+                            }
+
+                            for (int j = 0; j < players.Count; j++)
+                                party.Add(players[j]);
+                        }
+                        parties = parties.Where(hs => hs.Count > 1).ToList();
+
+                        for (int i = 0; i < playerData.Count; i++)
                         {
                             if (i == 0)
                                 columns.AddLine("Radiant:");
                             else if (i == 5)
                                 columns.AddLine("Dire:");
 
-                            var player = summaries.Players.Single(p => object.Equals(p.SteamId, ids[i]));
+                            var player = playerData[i].Item1;
+                            var game = playerData[i].Item2;
+                            var overview = playerData[i].Item4;
 
-                            var psa = new PlayerServiceApi(steamKey);
-                            var dota = psa.GetOwnedGames(ids[i], 570);
-                            var games = dota.Games != null ? psa.GetOwnedGames(ids[i], 570).Games.FirstOrDefault(g => g.AppId == 570) : null;
-
-                            var friends = player.CommunityVisibilityState == 3 ? api.GetFriendList(ids[i]).Friends : null;
-                            var friendsInGame = friends != null ? friends.Select(f => summaries.Players.SingleOrDefault(p => object.Equals(p.SteamId, f.SteamId))).Where(f => f != null).ToList() : null;
-
-                            var countryCode = "private";
+                            var countryCode = "";
                             if (player.CommunityVisibilityState == 3)
                             {
-                                countryCode = player.LocStateCode == null && player.LocCountryCode == null ? 
+                                countryCode = player.LocStateCode == null && player.LocCountryCode == null ?
                                     "not set" :
                                     string.Format("{0}, {1}", player.LocStateCode, player.LocCountryCode);
                             }
 
+                            var party = parties.FindIndex(hs => hs.Contains(player.SteamId));
+
                             columns.AddLine(
                                 i + 1,
                                 player.PersonaName,
+                                party != -1 ? (party + 1).ToString() : "",
+                                player.TimeCreated != null ? player.TimeCreated.Value.ToString("MM-dd-yy") : "",
+                                game != null ? string.Format("{0:0.##}", game.PlaytimeForever / 60f).ToString() : "",
                                 countryCode,
-                                games != null ? games.PlaytimeForever / 60f : 0,
-                                friendsInGame != null && friendsInGame.Count > 0 ? string.Join(", ", friendsInGame.Select(f => f.PersonaName)) : friends != null ? "" : ">private<");
+                                overview != null ? (overview.Wins + overview.Losses).ToString() : "",
+                                overview != null ? string.Format("{0:00.0}%", (overview.Wins * 100f) / (overview.Wins + overview.Losses)).ToString() : "",
+                                overview != null ? overview.LastMatch.ToString("MM-dd-yy") : "");
                         }
 
                         var lines = columns.GetLines();
