@@ -27,21 +27,29 @@ namespace Dota2BanlistCore
     /// </summary>
     public static class CConsole
     {
-        public static void Write(ConsoleColor fore, String format, params Object[] arg)
+        public static void Write(ConsoleColor fore, String format, params Object[] args)
+        {
+            Write(fore, string.Format(format, args));
+        }
+        public static void Write(ConsoleColor fore, String input)
         {
             var f = Console.ForegroundColor;
             try
             {
                 Console.ForegroundColor = fore;
 
-                Console.Write(format, arg);
+                Console.Write(input);
             }
             finally
             {
                 Console.ForegroundColor = f;
             }
         }
-        public static void Write(ConsoleColor fore, ConsoleColor back, String format, params Object[] arg)
+        public static void Write(ConsoleColor fore, ConsoleColor back, String format, params Object[] args)
+        {
+            Write(fore, back, string.Format(format, args));
+        }
+        public static void Write(ConsoleColor fore, ConsoleColor back, String input)
         {
             var f = Console.ForegroundColor;
             var b = Console.BackgroundColor;
@@ -50,7 +58,7 @@ namespace Dota2BanlistCore
                 Console.ForegroundColor = fore;
                 Console.BackgroundColor = back;
 
-                Console.Write(format, arg);
+                Console.Write(input);
             }
             finally
             {
@@ -58,21 +66,29 @@ namespace Dota2BanlistCore
                 Console.BackgroundColor = b;
             }
         }
-        public static void WriteLine(ConsoleColor fore, String format, params Object[] arg)
+        public static void WriteLine(ConsoleColor fore, String format, params Object[] args)
+        {
+            WriteLine(fore, string.Format(format, args));
+        }
+        public static void WriteLine(ConsoleColor fore, String input)
         {
             var f = Console.ForegroundColor;
             try
             {
                 Console.ForegroundColor = fore;
 
-                Console.WriteLine(format, arg);
+                Console.WriteLine(input);
             }
             finally
             {
                 Console.ForegroundColor = f;
             }
         }
-        public static void WriteLine(ConsoleColor fore, ConsoleColor back, String format, params Object[] arg)
+        public static void WriteLine(ConsoleColor fore, ConsoleColor back, String format, params Object[] args)
+        {
+            WriteLine(fore, back, string.Format(format, args));
+        }
+        public static void WriteLine(ConsoleColor fore, ConsoleColor back, String input)
         {
             var f = Console.ForegroundColor;
             var b = Console.BackgroundColor;
@@ -81,7 +97,7 @@ namespace Dota2BanlistCore
                 Console.ForegroundColor = fore;
                 Console.BackgroundColor = back;
 
-                Console.WriteLine(format, arg);
+                Console.WriteLine(input);
             }
             finally
             {
