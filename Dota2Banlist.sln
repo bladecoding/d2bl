@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dota2Banlist", "Dota2Banlist\Dota2Banlist.csproj", "{4E9E18A0-BEC9-47A0-877A-5B543FCE2519}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dota2BanlistCore", "Dota2BanlistCore\Dota2BanlistCore.csproj", "{19B55A84-74DD-4DFE-95EA-699DAC55C4AB}"
