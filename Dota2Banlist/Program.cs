@@ -113,7 +113,7 @@ namespace Dota2Banlist
                         return;
 
                     //Load the latest match if its from within 5 minutes ago. That way you can open d2bl a bit later and still get stats.
-                    if (args.Matches.Count > 1 && (DateTime.Now - args.Matches.Last().Date) > TimeSpan.FromMinutes(5))
+                    if (args.Matches.Count > 1 && (DateTime.Now - args.Matches.Last().Date) > TimeSpan.FromMinutes(50000))
                         return;
 
                     //Don't block the filewatcher!
@@ -196,6 +196,8 @@ namespace Dota2Banlist
                                     columns.AddLine("Radiant:");
                                 else if (i == 5)
                                     columns.AddLine("Dire:");
+                                else if (i == 10)
+                                    columns.AddLine("Spectators:");
 
                                 var player = playerData[i].Item1;
                                 var game = playerData[i].Item2;

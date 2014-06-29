@@ -32,7 +32,7 @@ namespace Dota2BanlistCore
     public class ServerLogMatchProvider : IDisposable, IMatchProvider
     {
 
-        const string CrazyRegex = @"(?<date>\d+/\d+/\d+)\s+-\s+(?<time>\d+:\d+:\d+):\s+(?<ipaddr>\d+\.\d+\.\d+\.\d+:\d+)\s+\(\w+\s+(?<lobbyid>\d+)\s+(?<gamemode>\w+)\s+((?<ids>\d:\[\w+:\d+:\d+\])\s*)+\)(\s*\(\w+\s+\d+\s+((?<partyids>\d:\[\w+:\d+:\d+\])\s*)+\))?";
+        const string CrazyRegex = @"(?<date>\d+/\d+/\d+)\s+-\s+(?<time>\d+:\d+:\d+):\s+(?<ipaddr>\d+\.\d+\.\d+\.\d+:\d+)\s+\(\w+\s+(?<lobbyid>\d+)\s+(?<gamemode>\w+)\s+((?<ids>\d+:\[\w+:\d+:\d+\])\s*)+\)(\s*\(\w+\s+\d+\s+((?<partyids>\d+:\[\w+:\d+:\d+\])\s*)+\))?";
         const string SubCrazyRegex = @"\d+:\[\w+:\d+:(?<id>\d+)\]";
 
         readonly FileInfo m_ServerLogFile;

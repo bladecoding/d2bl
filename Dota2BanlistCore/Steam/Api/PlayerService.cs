@@ -45,7 +45,8 @@ namespace Steam.Api
                 var req = new GetOwnedGamesRequest
                 {
                     SteamId = steamId,
-                    AppIdsFilter = appids != null ? appids.ToList() : null //appids filter does nothing?
+                    AppIdsFilter = appids != null ? appids.ToList() : null, //appids filter does nothing?
+                    IncludePlayedFreeGames = true
                 };
 
                 var url = GetCallUrl("GetOwnedGames", "v0001", Tuple.Create("input_json", JsonConvert.SerializeObject(req)));

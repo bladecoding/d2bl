@@ -53,6 +53,14 @@ namespace Steam.Api.Model
 
         [JsonProperty("appids_filter", NullValueHandling = NullValueHandling.Ignore)]
         public IList<int> AppIdsFilter { get; set; }
+
+        [JsonProperty("include_played_free_games", NullValueHandling = NullValueHandling.Ignore)]
+        public bool? IncludePlayedFreeGames { get; set; }
+
+        [JsonProperty("include_appinfo", NullValueHandling = NullValueHandling.Ignore)]
+        public bool? IncludeAppinfo { get; set; }
+
+
     }
 
 }
