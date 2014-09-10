@@ -103,6 +103,7 @@
     <Compile Include="DotaBuff\Model\MostPlayedHero.cs" />
     <Compile Include="DotaBuff\Model\PlayerDetailsOverview.cs" />
     <Compile Include="DotaBuff\Model\VersusDetails.cs" />
+    <Compile Include="Steam\Api\Enums.cs" />
     <Compile Include="Util\CConsole.cs" />
     <Compile Include="Db\BanlistDb.Designer.cs">
       <AutoGen>True</AutoGen>
