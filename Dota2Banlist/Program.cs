@@ -138,6 +138,7 @@ namespace Dota2Banlist
                                     "Country",
                                     "Matches",
                                     "WinRatio",
+                                    "Abandons",
                                     "LastPlayed");
 
                             var playerData = new List<Tuple<PlayerSummary, OwnedGame, List<PlayerSummary>, PlayerDetailsOverview>>();
@@ -221,7 +222,8 @@ namespace Dota2Banlist
                                     game != null ? string.Format("{0:0.##}", game.PlaytimeForever / 60f).ToString() : "",
                                     countryCode,
                                     overview != null ? (overview.Wins + overview.Losses).ToString() : "",
-                                    overview != null ? string.Format("{0:00.0}%", (overview.Wins * 100f) / (overview.Wins + overview.Losses)).ToString() : "",
+                                    overview != null ? string.Format("{0:00.0}%", (overview.Wins * 100f) / (overview.Wins + overview.Losses + overview.Abandons)).ToString() : "",
+                                    overview != null ? overview.Abandons.ToString() : "",
                                     overview != null ? overview.LastMatch.ToString("MM-dd-yy") : "");
                             }
 

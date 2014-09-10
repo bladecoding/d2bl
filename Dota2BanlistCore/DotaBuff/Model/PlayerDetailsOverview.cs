@@ -28,5 +28,6 @@ namespace DotaBuff
         public int Wins { get; set; }
         public int Losses { get; set; }
         public DateTime LastMatch { get; set; }
+        public int Abandons { get; set; }
     }
 }

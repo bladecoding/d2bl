@@ -51,14 +51,17 @@ namespace DotaBuff
                 var avatarNode = GetNodeFromXpathOrError(doc.DocumentNode, "//*[@class=\"content-header-avatar\"]");
                 var nameNode = GetNodeFromXpathOrError(avatarNode, ".//img[contains(@class,'image-avatar')]");
                 var secondaryNode = GetNodeFromXpathOrError(doc.DocumentNode, "//*[@id=\"content-header-secondary\"]");
-                var lastMatchNode = GetNodeFromXpathOrError(secondaryNode, ".//time[@class='timeago']");
+                var lastMatchNode = GetNodeFromXpathOrError(secondaryNode, ".//time");
                 var wonNode = GetNodeFromXpathOrError(secondaryNode, ".//span[@class='wins']");
                 var lostNode = GetNodeFromXpathOrError(secondaryNode, ".//span[@class='losses']");
+                var abandonNode = secondaryNode.SelectSingleNode(".//span[@class='abandons']");
+
 
                 details.PlayerName = HtmlEntity.DeEntitize(nameNode.Attributes["alt"].Value);
                 details.LastMatch = ParseNodeDateTime(lastMatchNode);
                 details.Wins = int.Parse(wonNode.InnerText, NumberStyles.Any);
                 details.Losses = int.Parse(lostNode.InnerText, NumberStyles.Any);
+                details.Abandons = abandonNode != null ? int.Parse(abandonNode.InnerText, NumberStyles.Any) : 0;
                 details.MostPlayedHeroes = GetMostPlayedHeroes(doc.DocumentNode);
                 details.LatestRealMatches = RequestLatestMatches(id);
 
@@ -188,7 +191,7 @@ namespace DotaBuff
                 var heroNode = GetHeroNameFromMatchesLink(columns[columnIdx++]);
                 var wonNode = columns[columnIdx].SelectSingleNode(".//a[@class='won']");
                 var matchNode = GetNodeFromXpathOrError(columns[columnIdx], ".//a");
-                var timeNode = GetNodeFromXpathOrError(columns[columnIdx++], ".//time[@class='timeago']");
+                var timeNode = GetNodeFromXpathOrError(columns[columnIdx++], ".//time");
                 var gameModeNode = GetNodeFromXpathOrError(columns[columnIdx++], ".//div[@class='subtext']");
                 var durationNode = columns[columnIdx++];
                 var killsNode = GetNodeFromXpathOrError(columns[columnIdx++], ".//span[@class='kda-record']");
