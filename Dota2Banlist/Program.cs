@@ -150,8 +150,8 @@ namespace Dota2Banlist
                                 var player = summaries.Players.Single(p => object.Equals(p.SteamId, ids[i]));
 
                                 var psa = new PlayerServiceApi(steamKey);
-                                var dota = psa.GetOwnedGames(ids[i], 570);
-                                var game = dota.Games != null ? psa.GetOwnedGames(ids[i], 570).Games.FirstOrDefault(g => g.AppId == 570) : null;
+                                var dota = psa.GetOwnedGames(ids[i], (int)Dota2BanlistCore.Steam.Api.Enums.GameId.Dota2);
+                                var game = dota.Games != null ? psa.GetOwnedGames(ids[i], (int)Dota2BanlistCore.Steam.Api.Enums.GameId.Dota2).Games.FirstOrDefault(g => g.AppId == (int)Dota2BanlistCore.Steam.Api.Enums.GameId.Dota2) : null;
 
                                 var friends = player.CommunityVisibilityState == 3 ? api.GetFriendList(ids[i]).Friends : null;
                                 var friendsInGame = friends != null ? friends.Select(f => summaries.Players.SingleOrDefault(p => object.Equals(p.SteamId, f.SteamId))).Where(f => f != null).ToList() : new List<PlayerSummary>();
