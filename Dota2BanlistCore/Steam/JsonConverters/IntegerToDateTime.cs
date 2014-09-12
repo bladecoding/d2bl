@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Util;
 using Newtonsoft.Json;
 
 namespace Steam.JsonConverters
@@ -27,7 +28,12 @@ namespace Steam.JsonConverters
     {
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            throw new NotImplementedException();
+            if (value != null && value.GetType() == typeof(DateTime))
+            {
+                writer.WriteValue(DateHelper.DateTimeToUnixTimestamp((DateTime)value));
+                return;
+            }
+            throw new ArgumentException("Unable to convert type " + (value != null ? value.GetType().FullName : "null"), "objectType");
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
@@ -37,46 +43,18 @@ namespace Steam.JsonConverters
                 long num;
                 if (!long.TryParse((string)reader.Value, out num))
                     throw new ArgumentException("Unable to parse integer: " + reader.Value, "reader");
-                return UnixTimeStampToDateTime(num);
+                return DateHelper.UnixTimeStampToDateTime(num);
             }
-            if (IsNumericType(reader.ValueType))
+            if (NumericHelper.IsNumericType(reader.ValueType))
             {
-                return UnixTimeStampToDateTime(Convert.ToInt64(reader.Value));
+                return DateHelper.UnixTimeStampToDateTime(Convert.ToInt64(reader.Value));
             }
             throw new ArgumentException("Unable to convert type " + reader.ValueType, "objectType");
         }
 
         public override bool CanConvert(Type objectType)
         {
-            return objectType == typeof(string) || IsNumericType(objectType);
-        }
-
-        public static DateTime UnixTimeStampToDateTime(long unixTimeStamp)
-        {
-            var dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
-            dtDateTime = dtDateTime.AddSeconds(unixTimeStamp).ToLocalTime();
-            return dtDateTime;
-        }
-
-        static bool IsNumericType(Type type)
-        {
-            switch (Type.GetTypeCode(type))
-            {
-                case TypeCode.Byte:
-                case TypeCode.SByte:
-                case TypeCode.UInt16:
-                case TypeCode.UInt32:
-                case TypeCode.UInt64:
-                case TypeCode.Int16:
-                case TypeCode.Int32:
-                case TypeCode.Int64:
-                case TypeCode.Decimal:
-                case TypeCode.Double:
-                case TypeCode.Single:
-                    return true;
-                default:
-                    return false;
-            }
+            return objectType == typeof(string) || NumericHelper.IsNumericType(objectType);
         }
     }
 }

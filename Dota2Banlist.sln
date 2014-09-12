@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dota2Banlist", "Dota2Banlis
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dota2BanlistCore", "Dota2BanlistCore\Dota2BanlistCore.csproj", "{19B55A84-74DD-4DFE-95EA-699DAC55C4AB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dota2Analysis", "Dota2Analysis\Dota2Analysis.csproj", "{42DF7E02-BA7A-4426-8573-84FD18F5960B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +37,16 @@ Global
 		{19B55A84-74DD-4DFE-95EA-699DAC55C4AB}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{19B55A84-74DD-4DFE-95EA-699DAC55C4AB}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{19B55A84-74DD-4DFE-95EA-699DAC55C4AB}.Release|x86.ActiveCfg = Release|Any CPU
+		{42DF7E02-BA7A-4426-8573-84FD18F5960B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42DF7E02-BA7A-4426-8573-84FD18F5960B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42DF7E02-BA7A-4426-8573-84FD18F5960B}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{42DF7E02-BA7A-4426-8573-84FD18F5960B}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{42DF7E02-BA7A-4426-8573-84FD18F5960B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{42DF7E02-BA7A-4426-8573-84FD18F5960B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42DF7E02-BA7A-4426-8573-84FD18F5960B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42DF7E02-BA7A-4426-8573-84FD18F5960B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{42DF7E02-BA7A-4426-8573-84FD18F5960B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{42DF7E02-BA7A-4426-8573-84FD18F5960B}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

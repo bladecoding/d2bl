@@ -37,10 +37,14 @@ namespace Steam
             m_Y = y;
             m_Z = z;
         }
-
+        //EncodedId is actually the lower 32 bits of the 64bit steam id(aka the account id)
         public static SteamId ParseEncodedId(string str)
         {
             var num = long.Parse(str);
+            return ParseEncodedId(num);
+        }
+        public static SteamId ParseEncodedId(long num)
+        {
             var y = num & 1;
             var z = num >> 1;
             return new SteamId(SteamIdUniverse.Public, y, z);

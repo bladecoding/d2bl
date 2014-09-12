@@ -103,6 +103,11 @@
     <Compile Include="DotaBuff\Model\MostPlayedHero.cs" />
     <Compile Include="DotaBuff\Model\PlayerDetailsOverview.cs" />
     <Compile Include="DotaBuff\Model\VersusDetails.cs" />
+    <Compile Include="Steam\Api\DotaEconApi.cs" />
+    <Compile Include="Steam\Api\DotaMatches.cs" />
+    <Compile Include="Steam\Api\Model\GetHeroesResponse.cs" />
+    <Compile Include="Steam\Api\Model\GetMatchDetailsResponse.cs" />
+    <Compile Include="Steam\Api\Model\GetMatchHistoryResponse.cs" />
     <Compile Include="Util\CConsole.cs" />
     <Compile Include="Db\BanlistDb.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -143,6 +148,9 @@
     <Compile Include="Steam\JsonConverters\Steam64ToSteamId.cs" />
     <Compile Include="Steam\SteamId.cs" />
     <Compile Include="Util\ColumnLines.cs" />
+    <Compile Include="Util\DateHelper.cs" />
+    <Compile Include="Util\DbExt.cs" />
+    <Compile Include="Util\NumericHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Dota2Banlist.licenseheader">

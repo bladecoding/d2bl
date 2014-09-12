@@ -39,7 +39,7 @@ namespace Steam.Api.Model
         public SteamId SteamId { get; set; }
 
         [JsonProperty("communityvisibilitystate")]
-        public int CommunityVisibilityState { get; set; }
+        public PlayerSummaryVisibility CommunityVisibilityState { get; set; }
 
         [JsonProperty("profilestate")]
         public int ProfileState { get; set; }
@@ -65,11 +65,8 @@ namespace Steam.Api.Model
         [JsonProperty("avatarfull")]
         public string AvatarFull { get; set; }
 
-        /// <summary>
-        /// The user's current nickname.
-        /// </summary>
         [JsonProperty("personastate")]
-        public int PersonaState { get; set; }
+        public PlayerSummaryPersonaState PersonaState { get; set; }
 
         [JsonProperty("primaryclanid")]
         public string PrimaryClanId { get; set; }
@@ -83,5 +80,35 @@ namespace Steam.Api.Model
         [JsonProperty("locstatecode")]
         public string LocStateCode { get; set; }
 
+        public bool IsPublic
+        {
+            get
+            {
+                return CommunityVisibilityState != PlayerSummaryVisibility.Private &&
+                       CommunityVisibilityState != PlayerSummaryVisibility.FriendsOnly;
+            }
+        }
+
     }
+
+    public enum PlayerSummaryVisibility
+    {
+        Private = 1,
+        FriendsOnly = 2,
+        FriendsOfFriends = 3, // Currently this value is also set for "Public" and "Users Only" profiles
+        UsersOnly = 4,
+        Public = 5,
+    }
+
+    public enum PlayerSummaryPersonaState
+    {
+        Offline = 0, // (Also set when the profile is Private)
+        Online = 1,
+        Busy = 2,
+        Away = 3,
+        Snooze = 4,
+        LookingToTrade = 5,
+        LookingToPlay = 6,
+    }
+
 }

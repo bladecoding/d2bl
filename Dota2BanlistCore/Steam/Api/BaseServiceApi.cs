@@ -45,7 +45,7 @@ namespace Steam.Api
                 Tuple.Create("format", c_ApiFormat)
             }.Concat(param);
 
-            var urlParamsStr = string.Join("&", urlParams.Select(kv => HttpUtility.UrlEncode(kv.Item1) + "=" + HttpUtility.UrlEncode(kv.Item2)));
+            var urlParamsStr = string.Join("&", urlParams.Where(p => p != null).Select(kv => HttpUtility.UrlEncode(kv.Item1) + "=" + HttpUtility.UrlEncode(kv.Item2)));
             return string.Format("{0}/{1}/{2}/{3}?{4}", c_BaseUrl, ServiceName, func, version, urlParamsStr);
         }
     }

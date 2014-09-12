@@ -151,9 +151,9 @@ namespace Dota2Banlist
 
                                 var psa = new PlayerServiceApi(steamKey);
                                 var dota = psa.GetOwnedGames(ids[i], 570);
-                                var game = dota.Games != null ? psa.GetOwnedGames(ids[i], 570).Games.FirstOrDefault(g => g.AppId == 570) : null;
+                                var game = dota.Games != null ? dota.Games.FirstOrDefault(g => g.AppId == 570) : null;
 
-                                var friends = player.CommunityVisibilityState == 3 ? api.GetFriendList(ids[i]).Friends : null;
+                                var friends = player.IsPublic ? api.GetFriendList(ids[i]).Friends : null;
                                 var friendsInGame = friends != null ? friends.Select(f => summaries.Players.SingleOrDefault(p => object.Equals(p.SteamId, f.SteamId))).Where(f => f != null).ToList() : new List<PlayerSummary>();
 
                                 PlayerDetailsOverview overview = null;
@@ -205,7 +205,7 @@ namespace Dota2Banlist
                                 var overview = playerData[i].Item4;
 
                                 var countryCode = "";
-                                if (player.CommunityVisibilityState == 3)
+                                if (player.IsPublic)
                                 {
                                     countryCode = player.LocStateCode == null && player.LocCountryCode == null ?
                                         "not set" :

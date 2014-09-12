@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Util;
 using Newtonsoft.Json;
 
 namespace Steam.JsonConverters
@@ -47,6 +48,46 @@ namespace Steam.JsonConverters
         public override bool CanConvert(Type objectType)
         {
             return objectType == typeof(string);
+        }
+    }
+    public class AccountIdToSteamId : JsonConverter
+    {
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            if (value == null)
+            {
+                writer.WriteNull();
+                return;
+            }
+            if (value.GetType() == typeof(SteamId))
+            {
+                writer.WriteValue(((SteamId)value).ToEncodedId().ToString());
+                return;
+            }
+            throw new ArgumentException("Unable to convert type " + (value != null ? value.GetType().FullName : "null"), "objectType");
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            if (reader.Value == null)
+                return null;
+            if (reader.ValueType == typeof(string))
+            {
+                long num;
+                if (!long.TryParse((string)reader.Value, out num))
+                    throw new ArgumentException("Unable to parse integer: " + reader.Value, "reader");
+                return SteamId.ParseEncodedId(num);
+            }
+            if (NumericHelper.IsNumericType(reader.ValueType))
+            {
+                return SteamId.ParseEncodedId(Convert.ToInt64(reader.Value));
+            }
+            throw new ArgumentException("Unable to convert type " + reader.ValueType, "objectType");
+        }
+
+        public override bool CanConvert(Type objectType)
+        {
+            return objectType == typeof(string) || NumericHelper.IsNumericType(objectType);
         }
     }
 }
