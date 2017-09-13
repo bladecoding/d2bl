@@ -83,21 +83,13 @@ namespace Dota2Banlist
                     CConsole.WriteLine(ConsoleColor.Red, "Unable to automatically locate dota2. Please edit the settings and provide the path.");
                     return;
                 }
-                dotaPath = Path.Combine(steamPath, "steamapps\\common\\dota 2 beta\\dota");
+                dotaPath = Path.Combine(steamPath, "steamapps\\common\\dota 2 beta\\game\\dota");
             }
 
             var serverLogPath = Path.Combine(dotaPath, "server_log.txt");
             if (!File.Exists(serverLogPath))
             {
                 CConsole.WriteLine(ConsoleColor.Red, "Unable to locate dota2. Please make sure you have provided the correct path.");
-                return;
-            }
-
-            CConsole.WriteLine(ConsoleColor.Yellow, "Checking version..");
-            string versionMsg;
-            if (!CheckVersion(out versionMsg))
-            {
-                CConsole.WriteLine(ConsoleColor.Red, versionMsg);
                 return;
             }
 
@@ -113,8 +105,8 @@ namespace Dota2Banlist
                         return;
 
                     //Load the latest match if its from within 5 minutes ago. That way you can open d2bl a bit later and still get stats.
-                    if (args.Matches.Count > 1 && (DateTime.Now - args.Matches.Last().Date) > TimeSpan.FromMinutes(50000))
-                        return;
+                    //if (args.Matches.Count > 1 && (DateTime.Now - args.Matches.Last().Date) > TimeSpan.FromMinutes(50000))
+                       // return;
 
                     //Don't block the filewatcher!
                     //I feel dirty. Keep telling myself this is just for testing.
@@ -123,9 +115,10 @@ namespace Dota2Banlist
                         lock (LobbyLock)
                         {
                             var api = new SteamUserApi(steamKey);
-                            var summaries = api.GetPlayerSummaries(args.Matches.Last().SteamIds.ToArray());
-
-                            var ids = args.Matches.Last().SteamIds;
+                      
+                            var ids = args.Matches.Last().SteamIds.ToArray();
+                            var summaries = api.GetPlayerSummaries(ids);
+                            var playerBans = api.GetPlayerBans(ids);
 
                             var columns = new ColumnLines();
                             columns.Spacing = 2;
@@ -139,13 +132,14 @@ namespace Dota2Banlist
                                     "Matches",
                                     "WinRatio",
                                     "Abandons",
-                                    "LastPlayed");
+                                    "LastPlayed",
+                                    "Bans");
 
                             var playerData = new List<Tuple<PlayerSummary, OwnedGame, List<PlayerSummary>, PlayerDetailsOverview>>();
-                            for (int i = 0; i < ids.Count; i++)
+                            for (int i = 0; i < ids.Length; i++)
                             {
                                 Console.Clear();
-                                Console.WriteLine("Loading Information. {0:00}%", (i * 100f) / ids.Count);
+                                Console.WriteLine("Loading Information. {0:00}%", (i * 100f) / ids.Length);
 
                                 var player = summaries.Players.Single(p => object.Equals(p.SteamId, ids[i]));
 
@@ -213,6 +207,7 @@ namespace Dota2Banlist
                                 }
 
                                 var party = parties.FindIndex(hs => hs.Contains(player.SteamId));
+                                var banInfo = playerBans.Players.FirstOrDefault(p => Equals(p.SteamId, player.SteamId));
 
                                 columns.AddLine(
                                     i + 1,
@@ -224,7 +219,8 @@ namespace Dota2Banlist
                                     overview != null ? (overview.Wins + overview.Losses).ToString() : "",
                                     overview != null ? string.Format("{0:00.0}%", (overview.Wins * 100f) / (overview.Wins + overview.Losses + overview.Abandons)).ToString() : "",
                                     overview != null ? overview.Abandons.ToString() : "",
-                                    overview != null ? overview.LastMatch.ToString("MM-dd-yy") : "");
+                                    overview != null ? overview.LastMatch.ToString("MM-dd-yy") : "",
+                                    banInfo != null ? string.Format("{0}_{1}", banInfo.NumberOfVACBans, banInfo.DaysSinceLastBan) : "?");
                             }
 
                             var lines = columns.GetLines();

@@ -108,6 +108,7 @@
     <Compile Include="Steam\Api\Model\GetHeroesResponse.cs" />
     <Compile Include="Steam\Api\Model\GetMatchDetailsResponse.cs" />
     <Compile Include="Steam\Api\Model\GetMatchHistoryResponse.cs" />
+    <Compile Include="Steam\Api\Model\GetPlayerBansResponse.cs" />
     <Compile Include="Util\CConsole.cs" />
     <Compile Include="Db\BanlistDb.Designer.cs">
       <AutoGen>True</AutoGen>

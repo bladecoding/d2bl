@@ -23,8 +23,8 @@ namespace DotaBuff
     public class PlayerDetailsOverview
     {
         public string PlayerName { get; set; }
-        public IList<MostPlayedHero> MostPlayedHeroes { get; set; }
-        public IList<LatestRealMatch> LatestRealMatches { get; set; }
+        //public IList<MostPlayedHero> MostPlayedHeroes { get; set; }
+        //public IList<LatestRealMatch> LatestRealMatches { get; set; }
         public int Wins { get; set; }
         public int Losses { get; set; }
         public DateTime LastMatch { get; set; }

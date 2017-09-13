@@ -32,7 +32,19 @@ namespace Dota2BanlistCore
     public class ServerLogMatchProvider : IDisposable, IMatchProvider
     {
 
-        const string CrazyRegex = @"(?<date>\d+/\d+/\d+)\s+-\s+(?<time>\d+:\d+:\d+):\s+(?<ipaddr>\d+\.\d+\.\d+\.\d+:\d+)\s+\(\w+\s+(?<lobbyid>\d+)\s+(?<gamemode>\w+)\s+((?<ids>\d+:\[\w+:\d+:\d+\])\s*)+\)(\s*\(\w+\s+\d+\s+((?<partyids>\d+:\[\w+:\d+:\d+\])\s*)+\))?";
+        const string CrazyRegex = @"
+            (?<date>\d+/\d+/\d+)
+            \s+-\s+
+            (?<time>\d+:\d+:\d+):\s*
+            ((?<ipaddr>\d+\.\d+\.\d+\.\d+:\d+)|(?<ipaddr>\=\[\w+:\d+:(\d+:\d+)\])|(?<ipaddr>loopback))\s*
+
+            \(
+             \w+\s+
+             (?<lobbyid>\d+)\s+
+             (?<gamemode>\w+)\s+
+             ((?<ids>\d+:\[\w+:\d+:\d+\])\s*)+\)
+             (\s*\(\w+\s+\d+\s+((?<partyids>\d+:\[\w+:\d+:\d+\])\s*)*
+            \))?";
         const string SubCrazyRegex = @"\d+:\[\w+:\d+:(?<id>\d+)\]";
 
         readonly FileInfo m_ServerLogFile;
@@ -72,7 +84,7 @@ namespace Dota2BanlistCore
                 string line;
                 while ((line = m_ServerReader.ReadLine()) != null)
                 {
-                    var match = Regex.Match(line, CrazyRegex);
+                    var match = Regex.Match(line, CrazyRegex, RegexOptions.IgnorePatternWhitespace);
                     if (match.Success)
                     {
                         long lobbyId;
@@ -127,21 +139,46 @@ namespace Dota2BanlistCore
         {
             ipEndPoint = null;
 
-            var ep = endPoint.Split(':');
-            if (ep.Length != 2)
-                return false;
+            if (endPoint.Equals("loopback", StringComparison.InvariantCultureIgnoreCase))
+            {
+                ipEndPoint = new IPEndPoint(IPAddress.Loopback, 0);
+                return true;
+            }
 
-            IPAddress ip;
-            int port;
+            if (endPoint.StartsWith("="))
+            {
+                var ep = endPoint.Split(':');
+                if (ep.Length != 4)
+                    return false;
 
-            if (!IPAddress.TryParse(ep[0], out ip))
-                return false;
+                uint ip;
+                int port;
+                if (!uint.TryParse(ep[2], NumberStyles.None, NumberFormatInfo.CurrentInfo, out ip))
+                    return false;
+                if (!int.TryParse(ep[3].Substring(0, ep[3].Length - 1), NumberStyles.None, NumberFormatInfo.CurrentInfo, out port))
+                    return false;
 
-            if (!int.TryParse(ep[1], NumberStyles.None, NumberFormatInfo.CurrentInfo, out port))
-                return false;
+                ipEndPoint = new IPEndPoint(ip, port);
+                return true;
+            }
+            else
+            {
+                var ep = endPoint.Split(':');
+                if (ep.Length != 2)
+                    return false;
 
-            ipEndPoint = new IPEndPoint(ip, port);
-            return true;
+                IPAddress ip;
+                int port;
+
+                if (!IPAddress.TryParse(ep[0], out ip))
+                    return false;
+
+                if (!int.TryParse(ep[1], NumberStyles.None, NumberFormatInfo.CurrentInfo, out port))
+                    return false;
+
+                ipEndPoint = new IPEndPoint(ip, port);
+                return true;
+            }
         }
 
         #region Dispose

@@ -46,11 +46,15 @@ namespace DotaBuff
             {
                 var details = new PlayerDetailsOverview();
 
-                var doc = RequestDocument(string.Format("http://dotabuff.com/players/{0}", HttpUtility.UrlEncode(id)));
+                var doc = RequestDocument(string.Format("https://www.dotabuff.com/players/{0}", HttpUtility.UrlEncode(id)));
 
-                var avatarNode = GetNodeFromXpathOrError(doc.DocumentNode, "//*[@class=\"content-header-avatar\"]");
-                var nameNode = GetNodeFromXpathOrError(avatarNode, ".//img[contains(@class,'image-avatar')]");
-                var secondaryNode = GetNodeFromXpathOrError(doc.DocumentNode, "//*[@id=\"content-header-secondary\"]");
+                var avatarNode = GetNodeFromXpathOrError(doc.DocumentNode, "//*[@class=\"header-content-avatar\"]");
+                var nameNode = GetNodeFromXpathOrError(avatarNode, ".//img[contains(@class,'image-player')]");
+
+                var secondaryNode = doc.DocumentNode.SelectSingleNode("//*[@class=\"header-content-secondary\"]");
+                if (secondaryNode == null)
+                    return null; //Private profile :(
+
                 var lastMatchNode = GetNodeFromXpathOrError(secondaryNode, ".//time");
                 var wonNode = GetNodeFromXpathOrError(secondaryNode, ".//span[@class='wins']");
                 var lostNode = GetNodeFromXpathOrError(secondaryNode, ".//span[@class='losses']");
@@ -62,8 +66,8 @@ namespace DotaBuff
                 details.Wins = int.Parse(wonNode.InnerText, NumberStyles.Any);
                 details.Losses = int.Parse(lostNode.InnerText, NumberStyles.Any);
                 details.Abandons = abandonNode != null ? int.Parse(abandonNode.InnerText, NumberStyles.Any) : 0;
-                details.MostPlayedHeroes = GetMostPlayedHeroes(doc.DocumentNode);
-                details.LatestRealMatches = RequestLatestMatches(id);
+                //details.MostPlayedHeroes = GetMostPlayedHeroes(doc.DocumentNode);
+                //details.LatestRealMatches = RequestLatestMatches(id);
 
 
                 return details;
@@ -135,14 +139,14 @@ namespace DotaBuff
         private static IList<MostPlayedHero> GetMostPlayedHeroes(HtmlNode doc)
         {
             var heroes = new List<MostPlayedHero>();
-            var table = GetNodeFromXpathOrError(doc, ".//div[@class='primary']/section/article/table/tbody");
-            var rows = table.SelectNodes(".//tr");
+            var table = GetNodeFromXpathOrError(doc, ".//div[@class='heroes-overview']/section/article/table/tbody");
+            var rows = table.SelectNodes(".//div[@class='r-row']");
             foreach (var row in rows)
             {
                 var hero = new MostPlayedHero();
 
                 var columnIdx = 1; //Skip the icon column
-                var columns = row.SelectNodes(".//td");
+                var columns = row.SelectNodes(".//div[@class='r-body']");
 
                 var heroNode = GetHeroNameFromOverviewLink(columns[columnIdx++]);
                 var matchesNode = columns[columnIdx++];
@@ -221,7 +225,7 @@ namespace DotaBuff
         {
             var linkNode = node
                 .SelectNodes(".//a")
-                .FirstOrDefault(n => n.Attributes["href"] != null && n.Attributes["href"].Value.StartsWith("/heroes/"));
+                .FirstOrDefault(n => n.Attributes["href"] != null && n.Attributes["href"].Value.Contains("hero"));
             if (linkNode == null)
                 throw new InvalidOperationException("hero link not found");
             return linkNode.InnerText;
@@ -290,6 +294,7 @@ namespace DotaBuff
             var req = (HttpWebRequest)WebRequest.Create(url);
             req.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.76 Safari/537.36";
             req.ServicePoint.Expect100Continue = false;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3;
             using (var resp = req.GetResponse())
             {
                 using (var sr = new StreamReader(resp.GetResponseStream()))

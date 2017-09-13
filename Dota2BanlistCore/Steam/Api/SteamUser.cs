@@ -53,13 +53,41 @@ namespace Steam.Api
 
         public GetFriendListResponse GetFriendList(SteamId steamId, SteamUserRelationship relationship = SteamUserRelationship.friend)
         {
-            using (var wc = new WebClient())
+            try
             {
-                var url = GetCallUrl("GetFriendList", "v0001", Tuple.Create("steamid", steamId.ToSteamId64().ToString()), Tuple.Create("relationship", relationship.ToString()));
-                var data = wc.DownloadString(url);
-                var obj = JsonConvert.DeserializeObject<JObject>(data);
-                var resp = JsonConvert.DeserializeObject<GetFriendListResponse>(obj["friendslist"].ToString());
-                return resp;
+                using (var wc = new WebClient())
+                {
+                    var url = GetCallUrl("GetFriendList", "v0001", Tuple.Create("steamid", steamId.ToSteamId64().ToString()), Tuple.Create("relationship", relationship.ToString()));
+                    var data = wc.DownloadString(url);
+                    var obj = JsonConvert.DeserializeObject<JObject>(data);
+                    var resp = JsonConvert.DeserializeObject<GetFriendListResponse>(obj["friendslist"].ToString());
+                    return resp;
+                }
+            }
+            catch (WebException we)
+            {
+                if (we.Response != null && ((HttpWebResponse)we.Response).StatusCode == HttpStatusCode.Unauthorized)
+                    return new GetFriendListResponse();
+                throw;
+            }
+        }
+        public GetPlayerBansResponse GetPlayerBans(params SteamId[] steamIds)
+        {
+            try
+            {
+                using (var wc = new WebClient())
+                {
+                    var url = GetCallUrl("GetPlayerBans", "v0001", Tuple.Create("steamids", string.Join(",", steamIds.Select(s => s.ToSteamId64()))));
+                    var data = wc.DownloadString(url);
+                    var resp = JsonConvert.DeserializeObject<GetPlayerBansResponse>(data);
+                    return resp;
+                }
+            }
+            catch (WebException we)
+            {
+                if (we.Response != null && ((HttpWebResponse)we.Response).StatusCode == HttpStatusCode.Unauthorized)
+                    return new GetPlayerBansResponse();
+                throw;
             }
         }
 
