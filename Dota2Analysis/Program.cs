@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SQLite;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -23,7 +22,7 @@ namespace Dota2Analysis
             var steamId = SteamId.ParseEncodedId(args[0]);
             var steamKey = args[1];
 
-            var api = new DotaMatchesApi(steamKey);
+            /*var api = new DotaMatchesApi(steamKey);
             var steamApi = new SteamUserApi(steamKey);
             var dbPath = Path.Combine(Environment.CurrentDirectory, "test.db");
             var db = new DbMaster(new SQLiteConnection("Data Source=" + dbPath));
@@ -45,7 +44,7 @@ namespace Dota2Analysis
                 db.InsertPlayers(playersAndDota);
                 Console.WriteLine("Processed match " + match.MatchId + ". " + summaries.Players.Count + " players added");
                 Thread.Sleep(1000);
-            }
+            }*/
 
 
             //var matches = db.GetAllMatches();

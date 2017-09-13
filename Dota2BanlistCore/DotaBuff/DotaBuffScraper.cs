@@ -294,7 +294,7 @@ namespace DotaBuff
             var req = (HttpWebRequest)WebRequest.Create(url);
             req.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.76 Safari/537.36";
             req.ServicePoint.Expect100Continue = false;
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls12;
             using (var resp = req.GetResponse())
             {
                 using (var sr = new StreamReader(resp.GetResponseStream()))
