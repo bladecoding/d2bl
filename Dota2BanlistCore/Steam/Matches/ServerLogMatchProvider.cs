@@ -24,7 +24,6 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Ninject;
 using Steam;
 
 namespace Dota2BanlistCore
