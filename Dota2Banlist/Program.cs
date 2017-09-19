@@ -99,12 +99,14 @@ namespace Dota2Banlist
             {
                 server.MatchesFound += (sender, args) =>
                 {
-                    if (args.Matches.Count == 0)
+                    //Filter out loopback entries. These are received when you disconnect from a game.
+                    var filteredMatches = args.Matches.Where(m => !IPAddress.IsLoopback(m.IpAddress.Address)).ToList();
+                    if (filteredMatches.Count == 0)
                         return;
 
                     //Load the latest match if its from within 5 minutes ago. That way you can open d2bl a bit later and still get stats.
-                    //if (args.Matches.Count > 1 && (DateTime.Now - args.Matches.Last().Date) > TimeSpan.FromMinutes(50000))
-                       // return;
+                    //if (filteredMatches.Count > 1 && (DateTime.Now - filteredMatches.Last().Date) > TimeSpan.FromMinutes(50000))
+                    // return;
 
                     //Don't block the filewatcher!
                     //I feel dirty. Keep telling myself this is just for testing.
@@ -114,7 +116,7 @@ namespace Dota2Banlist
                         {
                             var api = new SteamUserApi(steamKey);
                       
-                            var ids = args.Matches.Last().SteamIds.ToArray();
+                            var ids = filteredMatches.Last().SteamIds.ToArray();
                             var summaries = api.GetPlayerSummaries(ids);
                             var playerBans = api.GetPlayerBans(ids);
 
